@@ -3,7 +3,6 @@ project(little3d)
 
 find_package(catkin REQUIRED COMPONENTS 
   roscpp std_msgs cmake_modules message_generation
-  roscpp
   std_srvs
 )
 
@@ -93,7 +92,7 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_subdirectory(include/SOIL)
 add_executable(showimage src/showimage.cpp)
-target_link_libraries(showimage SOIL)
+target_link_libraries(showimage SOIL ${catkin_LIBRARIES})
 
 
 install(TARGETS showimage
