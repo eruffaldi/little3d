@@ -84,8 +84,10 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 
 ## Declare a catkin package
 catkin_package( 
-	INCLUDE_DIRS src
-	CATKIN_DEPENDS roscpp  std_msgs 
+	INCLUDE_DIRS include
+  LIBRARIES SOIL 
+  #CATKIN_DEPENDS
+  #DEPENDS
 )
 include_directories(include ${catkin_INCLUDE_DIRS})
 
@@ -105,6 +107,10 @@ install(DIRECTORY res/
    FILES_MATCHING PATTERN "*"
 )
 
+install(DIRECTORY include/
+   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+   FILES_MATCHING PATTERN "*"
+)
 
 
 
