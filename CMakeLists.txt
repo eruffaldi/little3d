@@ -94,8 +94,16 @@ add_subdirectory(include/SOIL)
 add_executable(showimage src/showimage.cpp)
 target_link_libraries(showimage SOIL ${catkin_LIBRARIES})
 
+add_executable(assimp1 src/assimp1.cpp)
+target_link_libraries(assimp1 SOIL ${catkin_LIBRARIES})
 
 install(TARGETS showimage
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(TARGETS assimp1
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

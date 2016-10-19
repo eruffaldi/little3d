@@ -132,7 +132,7 @@ int main(int argc, char **argv)
 
 	GLImageProc img;
 	Texture tex;
-	if(!tex.load(argv[1]))
+	if(!tex.load(image))
 		return 0;
 		glERR("opengl:posttexload");
 	img.init();
@@ -142,7 +142,7 @@ int main(int argc, char **argv)
 
 	// TODO: make it lambda function
 	glfwSetKeyCallback(window, key_callback);
-
+	glClearColor(1.0,1.0,1.0,1.0);
 
 	do {
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
