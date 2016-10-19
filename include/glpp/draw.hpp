@@ -283,6 +283,8 @@ private:
 	GLuint resource_;
 };
 
+using VBO1 = VBO<1>;
+
 
 #ifndef USE_EGL
 inline void memcpyVBO(GLuint dst, GLuint src, int soff, int woff, int size)
@@ -618,6 +620,10 @@ struct GLScope<Sampler>
 
 	int unit_;
 };
+
+#define GLSCOPE_CON_IMPL(s1, s2) s1##s2
+#define GLSCOPE_CON(s1, s2) GLSCOPE_CON_IMPL(s1, s2)
+#define GLSCOPE(T) glpp::GLScope<glpp::T> GLSCOPE_CON(x,__LINE__)
 
 /// helper to specify front side rendering
 inline void xglFrontSide()
