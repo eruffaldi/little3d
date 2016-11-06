@@ -81,8 +81,6 @@ public:
 		glGenFramebuffers(1,&resource_);
 	}
 
-
-
 	operator GLuint ()
 	{
 		return resource_;
@@ -105,87 +103,6 @@ public:
 			glDeleteRenderbuffers(1,&rboColor_);
 			rboColor_ = 0;
 		}
-	}
-
-	/**
-	 * Color Attachment from allocated texture
-	 */
-	void attachcolor(const Texture & t, int index = 0)
-	{
-		if(!t)
-			std::cerr << "FBO attachcolor invalid texture for color attachment " << index << " @fbo " << (GLuint)*this << std::endl;
-		else
-		{
-			size_ = t.size();
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_2D, (GLuint)t, 0);		
-			std::cerr << "FBO attachcolor texture for color attachment " << index << " " << (GLuint)t << " " << size_.width << "x" << size_.height << " @fbo " << (GLuint)*this << std::endl;
-			glERR("attachcolor");
-		}
-	}
-
-	/**
-	 * Depth Attachment: ATTENTION OpenGL ES2 needs GL_DEPTHCOMPONENT16
-	 */
-	void attachdepth(const Texture & t)
-	{
-		if(!t)
-			std::cerr << "FBO attachcolor invalid texture for depth @fbo " << (GLuint)*this << std::endl;
-		else
-		{
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, (GLuint)t, 0);
-			std::cerr << "FBO attachdepth texture for depth attachment " << (GLuint)t  << " @fbo " << (GLuint)*this << std::endl;
-			glERR("attachdepth");
-		}
-	}
-
-	void attach(const ColorTexture & t, int index = 0)
-	{
-		size_ = t.size();
-		glERR("preattachcolor");
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_2D, (GLuint)t, 0);		
-		std::cerr << "FBO attachcolor texture for color attachment " << index << " " << (GLuint)t << " " << size_.width << "x" << size_.height << " @fbo " << (GLuint)*this << std::endl;
-		glERR("attachcolor");
-	}
-
-	void attach(const DepthTexture & t)
-	{
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, (GLuint)t, 0);
-		glERR("attachdepth");
-		std::cerr << "FBO attachdepth texture for depth attachment " << (GLuint)t  << " @fbo " << (GLuint)*this << std::endl;
-		glERR("attachdepth");
-	}
-
-	bool makergb()
-	{
-		if(size_.width == 0)
-			return false;
-
-		if(!rboColor_)
-			glGenRenderbuffers(1, &rboColor_);
-		glBindRenderbuffer(GL_RENDERBUFFER, rboColor_);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8,size_.width,size_.height);
-		glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER,rboColor_);		
-		glBindRenderbuffer(GL_RENDERBUFFER, 0);
-		return true;
-	}
-
-	bool makedepth()
-	{
-		if(size_.width == 0)
-			return false;
-
-		if(!rboDepthStencil_)
-			glGenRenderbuffers(1, &rboDepthStencil_);
-		glBindRenderbuffer(GL_RENDERBUFFER, rboDepthStencil_);
-#ifndef USE_EGL
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8,size_.width,size_.height);
-		glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER,rboDepthStencil_);		
-#else
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16,size_.width,size_.height);
-		glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,rboDepthStencil_);		
-#endif
-		glBindRenderbuffer(GL_RENDERBUFFER, 0);
-		return true;
 	}
 
 	enum ReadFormat { ColorRGB, Depth};
@@ -236,16 +153,6 @@ public:
 		return true;
 	}
 
-	void checkvalidate()
-	{
-		checkFramebufferStatus(validate());
-	}
-
-	GLenum validate()	
-	{
-		return glCheckFramebufferStatus(GL_FRAMEBUFFER);
-	}
-
 	void bind(GLenum what = GL_FRAMEBUFFER)
 	{
 		glBindFramebuffer(what,resource_);
@@ -271,6 +178,105 @@ public:
 				fbo.init();
 			fbo.bind();
 		}
+
+		operator GLuint () const { return (GLuint)fbo; }
+
+		void checkvalidate()
+		{
+			checkFramebufferStatus(validate());
+		}
+
+		GLenum validate()	
+		{
+			return glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		}
+
+		/**
+		 * Color Attachment from allocated texture
+		 */
+		void attachcolor(const Texture & t, int index = 0)
+		{
+			auto & size_ = fbo.size_;
+			if(!t)
+				std::cerr << "FBO attachcolor invalid texture for color attachment " << index << " @fbo " << (GLuint)*this << std::endl;
+			else
+			{
+				size_ = t.size();
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_2D, (GLuint)t, 0);		
+				std::cerr << "FBO attachcolor texture for color attachment " << index << " " << (GLuint)t << " " << size_.width << "x" << size_.height << " @fbo " << (GLuint)*this << std::endl;
+				glERR("attachcolor");
+			}
+		}
+
+		/**
+		 * Depth Attachment: ATTENTION OpenGL ES2 needs GL_DEPTHCOMPONENT16
+		 */
+		void attachdepth(const Texture & t)
+		{
+			auto & size_ = fbo.size_;
+			if(!t)
+				std::cerr << "FBO attachcolor invalid texture for depth @fbo " << (GLuint)*this << std::endl;
+			else
+			{
+				glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, (GLuint)t, 0);
+				std::cerr << "FBO attachdepth texture for depth attachment " << ((GLuint)t)  << " @fbo " << (GLuint)*this << std::endl;
+				glERR("attachdepth");
+			}
+		}
+
+		void attach(const ColorTexture & t, int index = 0)
+		{
+			auto & size_ = fbo.size_;
+			size_ = t.size();
+			glERR("preattachcolor");
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_2D, (GLuint)t, 0);		
+			std::cerr << "FBO attachcolor texture for color attachment " << index << " " << (GLuint)t << " " << size_.width << "x" << size_.height << " @fbo " << (GLuint)*this << std::endl;
+			glERR("attachcolor");
+		}
+
+		void attach(const DepthTexture & t)
+		{
+			auto & size_ = fbo.size_;
+			glERR("beforeattachdepth");
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, (GLuint)t,0); //GL_TEXTURE_2D, (GLuint)t, 0);
+			std::cerr << "FBO attachdepth texture for depth attachment " << (GLuint)t   << " " << size_.width << "x" << size_.height << " @fbo " << (GLuint)*this << std::endl;
+			glERR("afterattachdepth");
+		}
+
+		bool makergb()
+		{
+			auto & size_ = fbo.size_;
+			if(size_.width == 0)
+				return false;
+
+			if(!rboColor_)
+				glGenRenderbuffers(1, &rboColor_);
+			glBindRenderbuffer(GL_RENDERBUFFER, rboColor_);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8,size_.width,size_.height);
+			glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER,rboColor_);		
+			glBindRenderbuffer(GL_RENDERBUFFER, 0);
+			return true;
+		}
+
+		bool makedepth()
+		{
+			auto & size_ = fbo.size_;
+			if(size_.width == 0)
+				return false;
+
+			if(!rboDepthStencil_)
+				glGenRenderbuffers(1, &rboDepthStencil_);
+			glBindRenderbuffer(GL_RENDERBUFFER, rboDepthStencil_);
+	#ifndef USE_EGL
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8,size_.width,size_.height);
+			glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER,rboDepthStencil_);		
+	#else
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16,size_.width,size_.height);
+			glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,rboDepthStencil_);		
+	#endif
+			glBindRenderbuffer(GL_RENDERBUFFER, 0);
+			return true;
+		}		
 
 		~Setup()
 		{
