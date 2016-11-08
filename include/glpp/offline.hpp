@@ -245,6 +245,7 @@ public:
 
 		bool makergb()
 		{
+			auto & rboColor_ = fbo.rboColor_;
 			auto & size_ = fbo.size_;
 			if(size_.width == 0)
 				return false;
@@ -261,6 +262,7 @@ public:
 		bool makedepth()
 		{
 			auto & size_ = fbo.size_;
+			auto & rboDepthStencil_ = fbo.rboDepthStencil_;
 			if(size_.width == 0)
 				return false;
 
@@ -280,7 +282,7 @@ public:
 
 		~Setup()
 		{
-			fbo.checkvalidate();
+			checkvalidate();
 			fbo.unbind();
 		}
 	};	

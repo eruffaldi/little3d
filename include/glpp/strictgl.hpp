@@ -11,3 +11,50 @@ namespace glpp
 	enum class PT { TRIANGLES = GL_TRIANGLES}; 
 	enum class CM { COLOR = GL_COLOR_BUFFER_BIT, DEPTH = GL_DEPTH_BUFFER_BIT, COLOR_DEPTH = GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT};
 }
+
+template <class T>
+struct type2gl
+{
+};
+
+template <>
+struct type2gl<GLfloat>
+{
+	static constexpr GLenum value = GL_UNSIGNED_INT;
+};
+
+template <>
+struct type2gl<GLuint>
+{
+	static constexpr GLenum value = GL_UNSIGNED_INT;
+};
+
+template <>
+struct type2gl<GLubyte>
+{
+	static constexpr GLenum value = GL_UNSIGNED_BYTE;
+};
+
+
+template <GLenum q>
+struct gl2type
+{
+};
+
+template <>
+struct gl2type<GL_UNSIGNED_INT>
+{
+	using type = GLuint;
+};
+
+template <>
+struct gl2type<GL_UNSIGNED_BYTE>
+{
+	using type = GLubyte;
+};
+
+template <>
+struct gl2type<GL_FLOAT>
+{
+	using type = GLfloat;
+};

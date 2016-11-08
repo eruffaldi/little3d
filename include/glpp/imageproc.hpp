@@ -125,9 +125,9 @@ public:
 
         fbo_.init();
         {
-            GLScope<FBO> xfbo(fbo_);
-            fbo_.attachcolor(texture_);
-            checkFramebufferStatus(fbo_.validate());
+            FBO::Setup xfbo(fbo_);
+            xfbo.attachcolor(texture_);
+            checkFramebufferStatus(xfbo.validate());
         }
     }
 
